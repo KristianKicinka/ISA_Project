@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -std=c11 -pedantic -lm  -ggdb3
-FILES= dns_tunel.c
+FILES= dns_receiver.c
 
 .PHONY: build clean
 
