@@ -2,12 +2,12 @@ CC=gcc
 CFLAGS=-Wall -std=c11 -pedantic -lm  -ggdb3
 FILES= dns_sender.c
 
-.PHONY: build clean
+.PHONY: dns_sender clean
 
-all:build
+all:dns_sender
 
-build: $(FILES)
+dns_sender: $(FILES)
 	$(CC) $(CFLAGS) -o $@ $(FILES)
 
 clean:
-	@rm -f build
+	@rm -f dns_sender
