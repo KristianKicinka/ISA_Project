@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -std=c11 -pedantic -lm  -ggdb3
-FILES= dns_sender.c
+FILES= ../error.c ../program_arguments.c dns_sender.c
 
 .PHONY: dns_sender clean
 

@@ -1,6 +1,11 @@
-#ifndef DNS_RECEIVER
-#define DNS_RECEIVER
+#ifndef DNS_RECEIVER_H
+#define DNS_RECEIVER_H
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#endif // DNS_RECEIVER
+#include "../program_arguments.h"
+
+
+#endif // DNS_RECEIVER_H

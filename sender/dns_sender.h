@@ -1,6 +1,10 @@
-#ifndef DNS_SENDER
-#define DNS_SENDER
+#ifndef DNS_SENDER_H
+#define DNS_SENDER_H
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#endif // DNS_SENDER
+#include "../program_arguments.h"
+
+#endif // DNS_SENDER_H
