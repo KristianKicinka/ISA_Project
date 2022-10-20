@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../program_arguments.h"
+#include "../connection.h"
 
 
 #endif // DNS_RECEIVER_H
