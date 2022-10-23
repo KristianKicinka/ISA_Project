@@ -11,7 +11,7 @@ void setIpAddress(struct in_addr address, char *host){
 
 int createSocket(){
     int sock;
-    if ((sock = socket(AF_INET , SOCK_DGRAM , 0)) == -1)
+    if ((sock = socket(AF_INET , SOCK_DGRAM , IPPROTO_UDP)) == -1)
         proccessError(INTERNAL_ERROR);
     return sock;
 }
