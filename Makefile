@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -std=c11 -pedantic -lm  -ggdb3
-RECEIVER_FILES= error.c program_arguments.c connection.c ./receiver/dns_receiver.c
-SENDER_FILES= error.c program_arguments.c connection.c ./sender/dns_sender.c 
+RECEIVER_FILES= error.c program_arguments.c connection.c base32.c ./receiver/dns_receiver.c
+SENDER_FILES= error.c program_arguments.c connection.c base32.c ./sender/dns_sender.c 
 
 .PHONY: receiver sender clean
 
@@ -14,5 +14,5 @@ sender: $(SENDER_FILES)
 	$(CC) $(CFLAGS) -o dns_sender $(SENDER_FILES)
 
 clean:
-	@rm -f receiver
-	@rm -f sender
+	@rm -f dns_receiver
+	@rm -f dns_sender

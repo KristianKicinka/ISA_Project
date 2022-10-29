@@ -1,8 +1,10 @@
 #include "dns_sender.h"
 
 #define PORT 8080
-#define DNS_PAYLOAD_LEN 128
-#define DNS_PORT 53 
+#define PAYLOAD_LEN 128
+#define ENCODE_PAYLOAD_LEN 256
+#define LINE_LEN 300 
+
 
 int main(int argc, char const *argv[]){
     printf("Hello word ISA! from DNS Sender\n");
@@ -12,23 +14,10 @@ int main(int argc, char const *argv[]){
     printSenderArguments(senderArguments);
 
     struct sockaddr_in sender;
-    memset(&sender, 0, sizeof(sender)); 
+    memset(&sender, 0, sizeof(sender));
 
-    /*
-    setIpAddress( sender.sin_addr, senderArguments->BASE_HOST);
-    sender.sin_family = AF_INET;                   
-    sender.sin_port = htons(PORT);
-
-    int senderLen = sizeof(sender);
-
-    int sock = createSocket();
-    char *data = "help";
-
-    sendData(sock, data, strlen(data), sender, senderLen);
-    */
-
-    //generateData(senderArguments);
-    //loadData(senderArguments);
+    //char *ip = getImplicitDNSserverIP();
+    //printf("DNS SERVER IP IS : %s\n",ip);
 
     loadData(senderArguments);
 
@@ -46,27 +35,30 @@ SenderData *initSenderData(){
 }
 
 void clearSenderData(SenderData *senderData){
-    if (senderData !=NULL){
+    if (senderData != NULL){
         free(senderData);
     }    
 }
 
-void sendDnsData(SenderArguments *senderArguments, char *dataPayload){
-    struct hostent *hostent;
+void sendSenderData(SenderArguments *senderArguments, char *dataPayload){
 
-    dataPayload = encodeData(dataPayload);
+    char encoded_data[ENCODE_PAYLOAD_LEN] = {0};
+    base32_encode((uint8_t*)dataPayload, strlen(dataPayload), (u_int8_t*)encoded_data, ENCODE_PAYLOAD_LEN);
+
+    printf("Encoded string : %s\n",encoded_data);
     
     if(senderArguments->UPSTREAM_DNS_IP != NULL)
-        sendDataToDnsIP(senderArguments, dataPayload);
+        sendDataToDnsIP(senderArguments->UPSTREAM_DNS_IP, senderArguments->BASE_HOST, encoded_data);
     else{
-        if ((hostent = gethostbyname(dataPayload)) == NULL)
-            proccessError(INTERNAL_ERROR);
+        char *dns_ip = getImplicitDNSserverIP();
+        sendDataToDnsIP(dns_ip, senderArguments->BASE_HOST, encoded_data);
     }
+
 }
 
 void loadData(SenderArguments *senderArguments){
 
-    char buffer[DNS_PAYLOAD_LEN];
+    char load_buffer[PAYLOAD_LEN];
     FILE* filePointer;
 
     if (senderArguments->SRC_FILEPATH == NULL)
@@ -78,105 +70,40 @@ void loadData(SenderArguments *senderArguments){
     }
    
     while(!feof(filePointer)) {
-        int loaded = fread(buffer, 1, DNS_PAYLOAD_LEN, filePointer);
-        buffer[loaded] = 0;
-        printf("-------------------\n%s\n-------------------\n", buffer);
-        sendDnsData(senderArguments, buffer);
+        int loaded = fread(load_buffer, 1, PAYLOAD_LEN, filePointer);
+        load_buffer[loaded] = 0;
+        printf("-------------------\n%s\n-------------------\n", load_buffer);
+        sendSenderData(senderArguments, load_buffer);
+        
     }
 
     if(filePointer != stdin)
         fclose(filePointer);
 }
 
-char *encodeData(char* data){
-    return data;
-}
+char *getImplicitDNSserverIP(){
+    FILE *resolv_file = fopen("/etc/resolv.conf", "r");
+    char line[LINE_LEN] = {0};
+    char line_start[11] = {0};
+    char *parse_item;
 
-void sendDataToDnsIP(SenderArguments *senderArguments, char *dataPayload){
-
-    unsigned char dns_buffer[512] = {0};
-    struct sockaddr_in destination;
-
-    int sock = createSocket();
-
-    destination.sin_family = AF_INET;
-	destination.sin_port = htons(DNS_PORT);
-	destination.sin_addr.s_addr = inet_addr(senderArguments->UPSTREAM_DNS_IP);
-
-    initDnsHeader(dns_buffer);
-    unsigned char *dns_query = dns_buffer + sizeof(DnsHeader);
-    
-    int query_length = createDNSquery(dns_query, dataPayload, senderArguments->BASE_HOST);
-
-    if(sendto(sock,(char*)dns_buffer,sizeof(DnsHeader) + query_length, 0, (struct sockaddr*)&destination, sizeof(destination)) < 0){
+    if (resolv_file == NULL)
         proccessError(INTERNAL_ERROR);
-    }
-
-}
-
-void initDnsHeader(unsigned char *buffer){
-    DnsHeader *dns_header = (DnsHeader *)buffer;
-
-    dns_header->id = htons(1489);
-    dns_header->rd = 1;
-    dns_header->qdcount = htons(1);
-
-}
-// Prelozenie formatu alebo kolko ostava
-int createDNSquery(unsigned char *query, char *payload, char *base_host){
-    int char_position = 0;
-    int segment_count = 0;
-    int total_length = 0;
     
-    for (int i = 0; i < strlen(payload); i++){
-        if (char_position == 63 || i == 0){
-            int remaining_payload = strlen(payload) - (segment_count * 63);
-            if (remaining_payload > 63)
-                query[segment_count * 64 + char_position ] = (unsigned char) 63;
-            else
-                query[segment_count * 64 + char_position ] = (unsigned char) remaining_payload;
+    while (fgets(line, LINE_LEN, resolv_file) != NULL)  {
 
-            char_position = 0;
-            if (i != 0){
-                segment_count++;
+        if (line[0] != '#'){
+            strncpy(line_start, line, 10);
+            line_start[10] = '\0';
+            if (!strcmp(line_start, "nameserver")){
+                parse_item = strtok(line," ");
+                parse_item = strtok(NULL," ");
+                parse_item[strlen(parse_item) - 1] = 0; // Delete /n from end
+                return parse_item;
             }
-        }
-        
-        query[segment_count * 64 + char_position + 1] = payload[i];
-        char_position++;
-    }
-
-    char base_part[strlen(base_host) + 2];
-    translateToDNSquery(base_part, base_host);
-
-    strcat((char*)query,base_part);
-    total_length = strlen(payload) + strlen(base_part) + segment_count;
-
-    query[total_length + 1] = (unsigned char) 0;
-
-    query[total_length + 2] = (unsigned char) 0;
-    query[total_length + 3] = (unsigned char) 1;
-    query[total_length + 4] = (unsigned char) 0;
-    query[total_length + 5] = (unsigned char) 1;
-    
-    return total_length + 6;
-}
-
-void translateToDNSquery(char* query, char *data){
-    int lock = 0;
-    int position = 0;
-
-    for (int i = 0; i < strlen(data); i++){
-        if (data[i] == '.'){
-            query[lock] = (unsigned char) position;
-            lock = i+1;
-            position = 0;
-        }else{
-            query[i+1] = data[i];
-            position ++;
+            
         }
     }
-    query[lock] = (unsigned char) position;
+    return NULL;
 }
-
 
