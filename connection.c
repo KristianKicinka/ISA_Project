@@ -4,8 +4,8 @@
 #define DNS_PORT 53
 #define DNS_PACKET_LEN 512
 
-#define INIT_PACKET_CODE 11
-#define DATA_PACKET_CODE 12  
+#define INIT_PACKET_CODE 12
+#define DATA_PACKET_CODE 13  
 
 
 void initSenderDNSheader(unsigned char *buffer, int packet_id, PacketType type){

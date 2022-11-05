@@ -7,7 +7,10 @@
 #define ENCODE_PAYLOAD_LEN 256
 #define BASE_32_CHARSET "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 
-FILE *targetFile;
+#define INIT_PACKET_CODE 12
+#define DATA_PACKET_CODE 13 
+
+char file_path[FILE_PATH_LEN] = {0};
 
 int main(int argc, char const *argv[]){
     printf("Hello word ISA! from DNS Reciever\n");
@@ -45,9 +48,9 @@ int main(int argc, char const *argv[]){
         DnsHeader *dns_header = (DnsHeader *) recv_buffer;
         char *data_payload = (char*) (recv_buffer + sizeof(DnsHeader));
 
-        if (dns_header->rcode == 11)
+        if (dns_header->rcode == INIT_PACKET_CODE)
             packet_type = INIT_PACKET;
-        else if (dns_header->rcode == 12)
+        else if (dns_header->rcode == DATA_PACKET_CODE)
             packet_type = DATA_PACKET;
     
         proccessDataPayload(data_payload, receiverArguments, packet_type);
@@ -65,23 +68,19 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
     printf("Data payload : %s \n", data_payload);
     unsigned char decoded_data[DNS_PACKET_LEN] = {0};
     char valid_base_host[DNS_PACKET_LEN] = {0};
-    char file_path[FILE_PATH_LEN] = {0};
 
     int data_length = strlen(data_payload) - strlen(arguments->BASE_HOST) - 1;
     char *recieved_base_host = (char *)(data_payload + data_length);
 
     getDataFromPayload(data_payload, decoded_data, data_length);
 
-    printf("Base host : %s \n",recieved_base_host);
-    printf("Decoded data : %s \n",decoded_data);
-
     translateToDNSquery(valid_base_host, arguments->BASE_HOST);
 
     if (!strcmp(recieved_base_host, valid_base_host)){
         if (type == INIT_PACKET){
             strcat(file_path, arguments->DST_FILEPATH);
+            strcat(file_path, "/");
             strcat(file_path, (char *) decoded_data);
-            printf("File path : %s\n", file_path);
         }else if (type == DATA_PACKET)
             writeToFile(file_path, (char*) decoded_data);
     }
@@ -92,13 +91,14 @@ void writeToFile(char *path, char *data){
     if (file == NULL)
         proccessError(INTERNAL_ERROR);
 
-    fprintf(file,"%s\n",data);
+    fprintf(file,"%s",data);
     fclose(file);
+    printf("Data was saved!!\n");
 }
 
 void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_packet){
     unsigned char buffer[DNS_PACKET_LEN] = {0};
-    strcpy((char *) buffer,recv_packet);
+    memcpy(buffer, recv_packet, strlen(recv_packet) + 1);
 
     DnsHeader *dns_header = (DnsHeader *) buffer;
 

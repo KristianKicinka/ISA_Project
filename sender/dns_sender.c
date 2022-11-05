@@ -58,7 +58,6 @@ void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketT
             sendDataPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
     }else{
         char *dns_ip = getImplicitDNSserverIP();
-        // sendDataToDnsIP(dns_ip, senderArguments->BASE_HOST, encoded_data);
         if (type == INIT_PACKET)
             sendInitPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
         else if(type == DATA_PACKET)
@@ -126,6 +125,7 @@ void sendInitPacket(char *ip_address, char *data, char *base_host){
 	destination.sin_addr.s_addr = inet_addr(ip_address);
 
     sendDataToDnsIP(destination, base_host, data, packet_id, INIT_PACKET);
+    packet_id++;
 }
 
 void sendDataPacket(char *ip_address, char *data, char *base_host){
@@ -136,6 +136,6 @@ void sendDataPacket(char *ip_address, char *data, char *base_host){
 	destination.sin_addr.s_addr = inet_addr(ip_address);
 
     sendDataToDnsIP(destination, base_host, data, packet_id, DATA_PACKET);
-
+    packet_id++;
 }
 
