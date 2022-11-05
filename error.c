@@ -8,6 +8,9 @@ void proccessError(ErrorType errorType){
         case INTERNAL_ERROR:
             printf("Internal error !\n");
             break;
+        case BASE_HOST_ERROR:
+            printf("Base host error !\n");
+            break;
         default:
             break;
     }

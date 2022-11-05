@@ -3,8 +3,11 @@
 #define PORT 8080
 #define PAYLOAD_LEN 128
 #define ENCODE_PAYLOAD_LEN 256
-#define LINE_LEN 300 
+#define LINE_LEN 300
+#define DNS_PORT 53 
+#define PACKET_ID 1444
 
+int packet_id = PACKET_ID;
 
 int main(int argc, char const *argv[]){
     printf("Hello word ISA! from DNS Sender\n");
@@ -16,9 +19,10 @@ int main(int argc, char const *argv[]){
     struct sockaddr_in sender;
     memset(&sender, 0, sizeof(sender));
 
-    //char *ip = getImplicitDNSserverIP();
-    //printf("DNS SERVER IP IS : %s\n",ip);
+    // Send init packet
+    sendSenderData(senderArguments, senderArguments->DST_FILEPATH, INIT_PACKET);
 
+    // Send data packets
     loadData(senderArguments);
 
     clearSenderArguments(senderArguments);
@@ -40,18 +44,25 @@ void clearSenderData(SenderData *senderData){
     }    
 }
 
-void sendSenderData(SenderArguments *senderArguments, char *dataPayload){
+void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketType type){
 
     char encoded_data[ENCODE_PAYLOAD_LEN] = {0};
     base32_encode((uint8_t*)dataPayload, strlen(dataPayload), (u_int8_t*)encoded_data, ENCODE_PAYLOAD_LEN);
 
     printf("Encoded string : %s\n",encoded_data);
     
-    if(senderArguments->UPSTREAM_DNS_IP != NULL)
-        sendDataToDnsIP(senderArguments->UPSTREAM_DNS_IP, senderArguments->BASE_HOST, encoded_data);
-    else{
+    if(senderArguments->UPSTREAM_DNS_IP != NULL){
+        if (type == INIT_PACKET)
+            sendInitPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
+        else if(type == DATA_PACKET)
+            sendDataPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
+    }else{
         char *dns_ip = getImplicitDNSserverIP();
-        sendDataToDnsIP(dns_ip, senderArguments->BASE_HOST, encoded_data);
+        // sendDataToDnsIP(dns_ip, senderArguments->BASE_HOST, encoded_data);
+        if (type == INIT_PACKET)
+            sendInitPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
+        else if(type == DATA_PACKET)
+            sendDataPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
     }
 
 }
@@ -73,7 +84,7 @@ void loadData(SenderArguments *senderArguments){
         int loaded = fread(load_buffer, 1, PAYLOAD_LEN, filePointer);
         load_buffer[loaded] = 0;
         printf("-------------------\n%s\n-------------------\n", load_buffer);
-        sendSenderData(senderArguments, load_buffer);
+        sendSenderData(senderArguments, load_buffer, DATA_PACKET);
         
     }
 
@@ -105,5 +116,26 @@ char *getImplicitDNSserverIP(){
         }
     }
     return NULL;
+}
+
+void sendInitPacket(char *ip_address, char *data, char *base_host){
+    struct sockaddr_in destination;
+
+    destination.sin_family = AF_INET;
+	destination.sin_port = htons(DNS_PORT);
+	destination.sin_addr.s_addr = inet_addr(ip_address);
+
+    sendDataToDnsIP(destination, base_host, data, packet_id, INIT_PACKET);
+}
+
+void sendDataPacket(char *ip_address, char *data, char *base_host){
+    struct sockaddr_in destination;
+
+    destination.sin_family = AF_INET;
+	destination.sin_port = htons(DNS_PORT);
+	destination.sin_addr.s_addr = inet_addr(ip_address);
+
+    sendDataToDnsIP(destination, base_host, data, packet_id, DATA_PACKET);
+
 }
 

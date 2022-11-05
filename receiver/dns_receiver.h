@@ -14,12 +14,12 @@ typedef struct receiver_data_t {
 } ReceiverData;
 */
 
-void createFile(FILE *file, char *receiver_part, char *sender_part);
-void closeFile(FILE *file);
-void writeToFile(FILE *file, char *data);
-void sendConfirmFilePath(int socket, struct sockaddr_in destination);
-void sendConfirmData(int socket, struct sockaddr_in destination);
-void sendEndTransport(int socket, struct sockaddr_in destination);
+void writeToFile(char *path, char *data);
+void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, PacketType type);
+void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_packet);
+void convertDNSQuery(char *data);
+
+void getDataFromPayload(char *data_payload, unsigned char *data, int data_size);
 
 
 #endif // DNS_RECEIVER_H

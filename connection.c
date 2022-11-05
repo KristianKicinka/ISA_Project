@@ -1,24 +1,25 @@
 #include "connection.h"
 
-#define PACKET_ID 1489
+#define PACKET_ID 1444
 #define DNS_PORT 53
 #define DNS_PACKET_LEN 512
 
+#define INIT_PACKET_CODE 11
+#define DATA_PACKET_CODE 12  
 
-void initSenderDNSheader(unsigned char *buffer){
+
+void initSenderDNSheader(unsigned char *buffer, int packet_id, PacketType type){
     DnsHeader *dns_header = (DnsHeader *)buffer;
 
-    dns_header->id = htons(PACKET_ID);
+    dns_header->id = htons(packet_id);
     dns_header->rd = 1;
     dns_header->qdcount = htons(1);
-}
-
-void initReceiverDNSheader(unsigned char *buffer){
-     DnsHeader *dns_header = (DnsHeader *)buffer;
-
-    dns_header->id = htons(PACKET_ID);
-    dns_header->rd = 1;
-    dns_header->qdcount = htons(1);
+    
+    if (type == INIT_PACKET)
+        dns_header->rcode = INIT_PACKET_CODE;
+    else if (type == DATA_PACKET)
+        dns_header->rcode = DATA_PACKET_CODE;
+    
 }
 
 int createSocket(){
@@ -85,25 +86,19 @@ void translateToDNSquery(char* query, char *data){
     query[lock] = (unsigned char) position;
 }
 
-void sendDataToDnsIP(char *ip_address, char *base_host, char *dataPayload){
+void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *dataPayload, int packet_id, PacketType type){
 
     unsigned char dns_buffer[DNS_PACKET_LEN] = {0};
     unsigned char recv_buffer[DNS_PACKET_LEN] = {0};
 
-    struct sockaddr_in destination;
-
     int sock = createSocket();
 
-    destination.sin_family = AF_INET;
-	destination.sin_port = htons(DNS_PORT);
-	destination.sin_addr.s_addr = inet_addr(ip_address);
-
-    initSenderDNSheader(dns_buffer);
+    initSenderDNSheader(dns_buffer, packet_id, type);
     unsigned char *dns_query = dns_buffer + sizeof(DnsHeader);
     
     int query_length = createDNSquery(dns_query, dataPayload, base_host);
 
-    if(sendto(sock,(char*)dns_buffer,sizeof(DnsHeader) + query_length, 0, (struct sockaddr*)&destination, sizeof(destination)) < 0){
+    if(sendto(sock,(char*) dns_buffer,sizeof(DnsHeader) + query_length, 0, (struct sockaddr*)&destination, sizeof(destination)) < 0){
         proccessError(INTERNAL_ERROR);
     }
 

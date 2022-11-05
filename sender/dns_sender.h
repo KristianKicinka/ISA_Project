@@ -21,7 +21,9 @@ typedef struct senderData_t {
 
 SenderData *initSenderData();
 void clearSenderData(SenderData *senderData);
-void sendSenderData(SenderArguments *senderArguments, char *dataPayload);
+void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketType type);
+void sendInitPacket(char *ip_address, char *data, char *base_host);
+void sendDataPacket(char *ip_address, char *data, char *base_host);
 void loadData(SenderArguments *senderArguments);
 char *getImplicitDNSserverIP();
 
