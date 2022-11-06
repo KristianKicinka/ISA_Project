@@ -12,6 +12,7 @@
 
 char file_path[FILE_PATH_LEN] = {0};
 
+
 int main(int argc, char const *argv[]){
     printf("Hello word ISA! from DNS Reciever\n");
 
@@ -64,6 +65,13 @@ int main(int argc, char const *argv[]){
     return 0;
 }
 
+/**
+ * @brief Funkcia zabezpečuje spracovanie dátovej časti DNS paketu.
+ * 
+ * @param data_payload Buffer obsahujúci dáta
+ * @param arguments Argumenty skriptu dns_reciever
+ * @param type Typ spracovávaného paketu
+ */
 void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, PacketType type){
     printf("Data payload : %s \n", data_payload);
     unsigned char decoded_data[DNS_PACKET_LEN] = {0};
@@ -86,6 +94,12 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
     }
 }
 
+/**
+ * @brief Funkcia zabezpečuje zápis získaných dát do súboru.
+ * 
+ * @param path Cesta k súboru
+ * @param data Dáta, ktoré majú byť zapísané
+ */
 void writeToFile(char *path, char *data){
     FILE *file = fopen(path, "w");
     if (file == NULL)
@@ -96,6 +110,13 @@ void writeToFile(char *path, char *data){
     printf("Data was saved!!\n");
 }
 
+/**
+ * @brief Funkcia zabezpečuje odoslanie odpovedi senderu.
+ * 
+ * @param socket Číslo otvoreného soketu
+ * @param destination Štruktúra s údajmi o prijímateľovi
+ * @param recv_packet Paket, ktorý je nutné potvrdiť
+ */
 void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_packet){
     unsigned char buffer[DNS_PACKET_LEN] = {0};
     memcpy(buffer, recv_packet, strlen(recv_packet) + 1);
@@ -110,6 +131,13 @@ void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_pa
 
 }
 
+/**
+ * @brief Funkcia transformuje dáta do dekodovaťeľnej formy a následne ich dekóduje.
+ * 
+ * @param data_payload Buffer obsahujúci dáta
+ * @param data Pole do ktorého sa uložia spracované dáta
+ * @param data_size Veľkosť data_payloadu
+ */
 void getDataFromPayload(char *data_payload, unsigned char *data, int data_size){
     unsigned char buffer[DNS_PACKET_LEN] = {0};
     int buffer_cnt = 0;
