@@ -1,5 +1,10 @@
 #include "error.h"
 
+/**
+ * @brief Funkcia zabezpečuje spracovanie chýb programu
+ * 
+ * @param errorType Typ chyby
+ */
 void proccessError(ErrorType errorType){
     switch (errorType){
         case ARGUMENTS_ERROR:

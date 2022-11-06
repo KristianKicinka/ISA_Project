@@ -66,7 +66,7 @@ int main(int argc, char const *argv[]){
 }
 
 /**
- * @brief Funkcia zabezpečuje spracovanie dátovej časti DNS paketu.
+ * @brief Funkcia zabezpečuje spracovanie dátovej časti DNS paketu
  * 
  * @param data_payload Buffer obsahujúci dáta
  * @param arguments Argumenty skriptu dns_reciever
@@ -95,7 +95,7 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
 }
 
 /**
- * @brief Funkcia zabezpečuje zápis získaných dát do súboru.
+ * @brief Funkcia zabezpečuje zápis získaných dát do súboru
  * 
  * @param path Cesta k súboru
  * @param data Dáta, ktoré majú byť zapísané
@@ -111,7 +111,7 @@ void writeToFile(char *path, char *data){
 }
 
 /**
- * @brief Funkcia zabezpečuje odoslanie odpovedi senderu.
+ * @brief Funkcia zabezpečuje odoslanie odpovedi senderu
  * 
  * @param socket Číslo otvoreného soketu
  * @param destination Štruktúra s údajmi o prijímateľovi
@@ -132,7 +132,7 @@ void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_pa
 }
 
 /**
- * @brief Funkcia transformuje dáta do dekodovaťeľnej formy a následne ich dekóduje.
+ * @brief Funkcia transformuje dáta do dekodovaťeľnej formy a následne ich dekóduje
  * 
  * @param data_payload Buffer obsahujúci dáta
  * @param data Pole do ktorého sa uložia spracované dáta
