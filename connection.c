@@ -92,6 +92,7 @@ void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *data
     unsigned char recv_buffer[DNS_PACKET_LEN] = {0};
 
     int sock = createSocket();
+    int result;
 
     initSenderDNSheader(dns_buffer, packet_id, type);
     unsigned char *dns_query = dns_buffer + sizeof(DnsHeader);
@@ -103,10 +104,18 @@ void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *data
     }
 
     int destination_size = sizeof(destination);
-    if (recvfrom(sock, (char*)recv_buffer, sizeof(recv_buffer), MSG_WAITALL, (struct sockaddr*) &destination, (socklen_t*)&destination_size) < 0){
-        proccessError(INTERNAL_ERROR);
+    while ((result = recvfrom(sock, (char*)recv_buffer, sizeof(recv_buffer), MSG_WAITALL, (struct sockaddr*) &destination, (socklen_t*)&destination_size))){
+        if (result == EWOULDBLOCK){
+            if(sendto(sock,(char*) dns_buffer,sizeof(DnsHeader) + query_length, 0, (struct sockaddr*)&destination, sizeof(destination)) < 0){
+                proccessError(INTERNAL_ERROR);
+            }
+        }else if (result == -1){
+            proccessError(INTERNAL_ERROR);
+        }else if (result >= 0){
+            break;
+        }
     }
-    
+
     (void) recv_buffer;
 
 }

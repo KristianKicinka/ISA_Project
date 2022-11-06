@@ -13,6 +13,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <inttypes.h>
+#include <errno.h>
 
 #include "program_arguments.h"
 #include "base32.h"

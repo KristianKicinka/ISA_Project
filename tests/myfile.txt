@@ -1,4 +1,1 @@
-SomeSampleData
-Because
-why
-not
+This is the message
