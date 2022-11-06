@@ -8,6 +8,13 @@
 #define DATA_PACKET_CODE 13  
 
 
+/**
+ * @brief Funkcia zabezpečuje vytvorenie a nastavenie hlavičky DNS paketu
+ * 
+ * @param buffer DNS paket
+ * @param packet_id Identifikátor DNS paketu
+ * @param type Typ DNS paketu
+ */
 void initSenderDNSheader(unsigned char *buffer, int packet_id, PacketType type){
     DnsHeader *dns_header = (DnsHeader *)buffer;
 
@@ -22,6 +29,11 @@ void initSenderDNSheader(unsigned char *buffer, int packet_id, PacketType type){
     
 }
 
+/**
+ * @brief Funkcia zabezpečuje vytvorenie a nastavenie soketu
+ * 
+ * @return int Číslo soketu
+ */
 int createSocket(){
     int sock;
     if ((sock = socket(AF_INET , SOCK_DGRAM , IPPROTO_UDP)) == -1)
@@ -29,7 +41,14 @@ int createSocket(){
     return sock;
 }
 
-// Prelozenie formatu alebo kolko ostava
+/**
+ * @brief Funkcia zabezpečuje vytvorenie DNS query
+ * 
+ * @param query Výsledná DNS query
+ * @param payload Dáta ktoré majú byť spracované do formy DNS query
+ * @param base_host Base host zadaný ako parameter
+ * @return int Dĺžka DNS query
+ */
 int createDNSquery(unsigned char *query, char *payload, char *base_host){
     int char_position = 0;
     int segment_count = 0;
@@ -69,6 +88,15 @@ int createDNSquery(unsigned char *query, char *payload, char *base_host){
     return total_length + 6;
 }
 
+/**
+ * @brief Funkcia zabezpečuje transformáciu dát na DNS query
+ * 
+ *  Funkcia inšpirovaná zdrojom: 
+ *      https://www.binarytides.com/dns-query-code-in-c-with-linux-sockets/
+ * 
+ * @param query Výsledná DNS query
+ * @param data Dáta, ktoré majú byť transformované
+ */
 void translateToDNSquery(char* query, char *data){
     int lock = 0;
     int position = 0;
@@ -86,6 +114,15 @@ void translateToDNSquery(char* query, char *data){
     query[lock] = (unsigned char) position;
 }
 
+/**
+ * @brief Funkcia zabezpečuje odoslanie DNS paketu
+ * 
+ * @param destination Štruktúra obsahujúca informácie o prijímateľovi
+ * @param base_host Base host zadaný ako parameter
+ * @param dataPayload Dátová časť paketu
+ * @param packet_id Identifikátor paketu
+ * @param type Typ paketu
+ */
 void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *dataPayload, int packet_id, PacketType type){
 
     unsigned char dns_buffer[DNS_PACKET_LEN] = {0};
@@ -117,6 +154,4 @@ void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *data
     }
 
     (void) recv_buffer;
-
 }
-

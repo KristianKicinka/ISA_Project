@@ -8,12 +8,6 @@
 
 #include "../connection.h"
 
-/*
-typedef struct receiver_data_t {
-    FILE *file,
-} ReceiverData;
-*/
-
 void writeToFile(char *path, char *data);
 void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, PacketType type);
 void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_packet);
