@@ -18,7 +18,7 @@
 #include "program_arguments.h"
 #include "base32.h"
 
-//DNS header structure
+//  Štruktúra DNS hlavičky
 // All uint16 are in network byte order!!!
 typedef struct __attribute__((__packed__)) dns_header {
   uint16_t id;

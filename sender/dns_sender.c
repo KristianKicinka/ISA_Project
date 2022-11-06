@@ -19,10 +19,10 @@ int main(int argc, char const *argv[]){
     struct sockaddr_in sender;
     memset(&sender, 0, sizeof(sender));
 
-    // Send init packet
+    // Odoslanie init paketu
     sendSenderData(senderArguments, senderArguments->DST_FILEPATH, INIT_PACKET);
 
-    // Send data packets
+    // Spracovanie data paketu
     loadData(senderArguments);
 
     clearSenderArguments(senderArguments);
@@ -30,6 +30,11 @@ int main(int argc, char const *argv[]){
     return 0;
 }
 
+/**
+ * @brief Funkcia zabezpečuje inicializáciu štruktúry SenderData
+ * 
+ * @return SenderData* Výsledná štruktúra
+ */
 SenderData *initSenderData(){
     SenderData *senderData = calloc(1, sizeof(SenderData));
     if (senderData == NULL){
@@ -38,12 +43,24 @@ SenderData *initSenderData(){
     return senderData;
 }
 
+/**
+ * @brief Funkcia zabezpečuje čistenie štruktúry
+ * 
+ * @param senderData Štruktúra SenderData
+ */
 void clearSenderData(SenderData *senderData){
     if (senderData != NULL){
         free(senderData);
     }    
 }
 
+/**
+ * @brief Funkcia zabezpečuje zakódovanie dát a výber cieľovej IP DNS servera
+ * 
+ * @param senderArguments Argumenty dns_sender skriptu
+ * @param dataPayload Dátová časť payloadu
+ * @param type Typ DNS paketu
+ */
 void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketType type){
 
     char encoded_data[ENCODE_PAYLOAD_LEN] = {0};
@@ -66,6 +83,11 @@ void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketT
 
 }
 
+/**
+ * @brief Funkcia zabezpečuje načítanie dát zo súboru
+ * 
+ * @param senderArguments Argumenty dns_sender skriptu
+ */
 void loadData(SenderArguments *senderArguments){
 
     char load_buffer[PAYLOAD_LEN];
@@ -91,6 +113,11 @@ void loadData(SenderArguments *senderArguments){
         fclose(filePointer);
 }
 
+/**
+ * @brief Funkcia zabezpečuje získanie IP DNS serveru z resolv.conf súboru
+ * 
+ * @return char* IP adresa
+ */
 char *getImplicitDNSserverIP(){
     FILE *resolv_file = fopen("/etc/resolv.conf", "r");
     char line[LINE_LEN] = {0};
@@ -117,6 +144,13 @@ char *getImplicitDNSserverIP(){
     return NULL;
 }
 
+/**
+ * @brief Funkcia zabezpečuje nastavenie a odoslanie DNS init paketu
+ * 
+ * @param ip_address IP adresa DNS serveru (prijímateľa)
+ * @param data Dáta DNS paketu
+ * @param base_host Base host zadaný ako parameter skriptu
+ */
 void sendInitPacket(char *ip_address, char *data, char *base_host){
     struct sockaddr_in destination;
 
@@ -128,6 +162,13 @@ void sendInitPacket(char *ip_address, char *data, char *base_host){
     packet_id++;
 }
 
+/**
+ * @brief Funkcia zabezpečuje nastavenie a odoslanie DNS data paketu
+ * 
+ * @param ip_address IP adresa DNS serveru (prijímateľa)
+ * @param data Dáta DNS paketu
+ * @param base_host Base host zadaný ako parameter skriptu
+ */
 void sendDataPacket(char *ip_address, char *data, char *base_host){
     struct sockaddr_in destination;
 
@@ -138,4 +179,3 @@ void sendDataPacket(char *ip_address, char *data, char *base_host){
     sendDataToDnsIP(destination, base_host, data, packet_id, DATA_PACKET);
     packet_id++;
 }
-
