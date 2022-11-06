@@ -1,3 +1,14 @@
+/**
+ * @file dns_sender.c
+ * @author Kristián Kičinka (xkicin02)
+ * @brief 
+ * @version 0.1
+ * @date 2022-11-07
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #include "dns_sender.h"
 
 #define PORT 8080

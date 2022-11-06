@@ -1,6 +1,6 @@
 /**
  * @file program_arguments.c
- * @author your name (you@domain.com)
+ * @author Kristián Kičinka (xkicin02)
  * @brief 
  * @version 0.1
  * @date 2022-11-07

@@ -1,6 +1,16 @@
+/**
+ * @file dns_receiver.c
+ * @author Kristián Kičinka (xkicin02)
+ * @brief 
+ * @version 0.1
+ * @date 2022-11-07
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #include "dns_receiver.h"
 
-//#define PACKET_ID 1489
 #define DNS_PORT 53
 #define DNS_PACKET_LEN 512
 #define FILE_PATH_LEN 1024 

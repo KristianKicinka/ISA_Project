@@ -1,3 +1,14 @@
+/**
+ * @file program_arguments.h
+ * @author Kristián Kičinka (xkicin02)
+ * @brief 
+ * @version 0.1
+ * @date 2022-11-07
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #ifndef PROGRAM_ARGUMENTS_H
 #define PROGRAM_ARGUMENTS_H
 

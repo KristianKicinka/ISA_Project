@@ -1,3 +1,14 @@
+/**
+ * @file connection.c
+ * @author Kristián Kičinka (xkicin02)
+ * @brief 
+ * @version 0.1
+ * @date 2022-11-07
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
 #include "connection.h"
 
 #define PACKET_ID 1444
