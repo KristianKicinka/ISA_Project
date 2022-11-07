@@ -154,7 +154,7 @@ void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_pa
 
     dns_header->qr = 1;
 
-    if(sendto(socket,(char*) buffer, strlen((char*) buffer), 0, (struct sockaddr*)&destination, sizeof(destination)) < 0){
+    if(sendto(socket,(char*) buffer, sizeof(DnsHeader), 0, (struct sockaddr*)&destination, sizeof(destination)) < 0){
         proccessError(INTERNAL_ERROR);
     }
 
