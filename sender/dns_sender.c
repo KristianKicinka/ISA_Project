@@ -92,12 +92,16 @@ void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketT
             sendInitPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
         else if(type == DATA_PACKET)
             sendDataPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
+        else if (type == END_PACKET)
+            sendEndPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
     }else{
         char *dns_ip = getImplicitDNSserverIP();
         if (type == INIT_PACKET)
             sendInitPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
         else if(type == DATA_PACKET)
             sendDataPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
+        else if (type == END_PACKET)
+            sendEndPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
     }
 
 }

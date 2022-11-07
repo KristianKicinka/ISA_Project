@@ -104,7 +104,7 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
     int data_length = strlen(data_payload) - strlen(arguments->BASE_HOST) - 1;
     char *recieved_base_host = (char *)(data_payload + data_length);
 
-    getDataFromPayload(data_payload, decoded_data, data_length);
+    int decoded_data_size = getDataFromPayload(data_payload, decoded_data, data_length);
 
     translateToDNSquery(valid_base_host, arguments->BASE_HOST);
 
@@ -113,8 +113,9 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
             strcat(file_path, arguments->DST_FILEPATH);
             strcat(file_path, "/");
             strcat(file_path, (char *) decoded_data);
+            remove(file_path);
         }else if (type == DATA_PACKET){
-            writeToFile(file_path, (char*) decoded_data);
+            writeToFile(file_path, (char*) decoded_data, decoded_data_size);
             chunk_id++;
         }else if (type == END_PACKET){
             return;
@@ -129,12 +130,12 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
  * @param path Cesta k súboru
  * @param data Dáta, ktoré majú byť zapísané
  */
-void writeToFile(char *path, char *data){
+void writeToFile(char *path, char *data, int data_size){
     FILE *file = fopen(path, "ab");
     if (file == NULL)
         proccessError(INTERNAL_ERROR);
 
-    fprintf(file,"%s",data);
+    fwrite(data, 1, data_size, file);
     fclose(file);
     printf("Data was written to file !!\n");
 }
@@ -167,7 +168,7 @@ void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_pa
  * @param data Pole do ktorého sa uložia spracované dáta
  * @param data_size Veľkosť data_payloadu
  */
-void getDataFromPayload(char *data_payload, unsigned char *data, int data_size){
+int getDataFromPayload(char *data_payload, unsigned char *data, int data_size){
     unsigned char buffer[DNS_PACKET_LEN] = {0};
     int buffer_cnt = 0;
 
@@ -179,7 +180,7 @@ void getDataFromPayload(char *data_payload, unsigned char *data, int data_size){
         }
     }
 
-    base32_decode((u_int8_t*) buffer,(u_int8_t*) data, ENCODE_PAYLOAD_LEN);
+    return base32_decode((u_int8_t*) buffer,(u_int8_t*) data, ENCODE_PAYLOAD_LEN);
     
 }
 
