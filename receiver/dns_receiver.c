@@ -113,13 +113,13 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
  * @param data Dáta, ktoré majú byť zapísané
  */
 void writeToFile(char *path, char *data){
-    FILE *file = fopen(path, "w");
+    FILE *file = fopen(path, "wb");
     if (file == NULL)
         proccessError(INTERNAL_ERROR);
 
     fprintf(file,"%s",data);
     fclose(file);
-    printf("Data was saved!!\n");
+    printf("Data was saved !!\n");
 }
 
 /**

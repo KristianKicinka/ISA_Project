@@ -106,7 +106,7 @@ void loadData(SenderArguments *senderArguments){
     if (senderArguments->SRC_FILEPATH == NULL)
         filePointer = stdin;
     else{
-        filePointer = fopen(senderArguments->SRC_FILEPATH, "r");
+        filePointer = fopen(senderArguments->SRC_FILEPATH, "rb");
         if (filePointer == NULL)
             proccessError(INTERNAL_ERROR);
     }
@@ -168,7 +168,7 @@ void sendInitPacket(char *ip_address, char *data, char *base_host){
 	destination.sin_addr.s_addr = inet_addr(ip_address);
 
     sendDataToDnsIP(destination, base_host, data, packet_id, INIT_PACKET);
-    printf("Init packet was sent!!\n");
+    printf("Init packet was sent !!\n");
     packet_id++;
 }
 
@@ -187,6 +187,6 @@ void sendDataPacket(char *ip_address, char *data, char *base_host){
 	destination.sin_addr.s_addr = inet_addr(ip_address);
 
     sendDataToDnsIP(destination, base_host, data, packet_id, DATA_PACKET);
-    printf("Data packet was sent!!\n");
+    printf("Data packet was sent !!\n");
     packet_id++;
 }

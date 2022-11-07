@@ -113,6 +113,7 @@ void printSenderArguments(SenderArguments *senderArguments){
     printf("BASE_HOST : %s\n",senderArguments->BASE_HOST);
     printf("DST_FILEPATH : %s\n",senderArguments->DST_FILEPATH);
     printf("SRC_FILEPATH : %s\n",senderArguments->SRC_FILEPATH);
+    printf("----------------------------------------------------\n");
 }
 
 /**
@@ -170,6 +171,7 @@ void clearReceiverArguments(ReceiverArguments *arguments){
  * @param receiverArguments Štruktúra reciever argumentov
  */
 void printReceiverArguments(ReceiverArguments *receiverArguments){
-    printf("BASE HOST : %s\n",receiverArguments->BASE_HOST);
-    printf("DESTINATION FILEPATH : %s\n",receiverArguments->DST_FILEPATH);
+    printf("BASE_HOST : %s\n",receiverArguments->BASE_HOST);
+    printf("DST_FILEPATH : %s\n",receiverArguments->DST_FILEPATH);
+    printf("----------------------------------------------------\n");
 }
