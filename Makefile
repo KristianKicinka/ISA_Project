@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-Wall -std=c11 -pedantic -lm  -ggdb3
-RECEIVER_FILES= error.c program_arguments.c connection.c base32.c ./receiver/dns_receiver.c
-SENDER_FILES= error.c program_arguments.c connection.c base32.c ./sender/dns_sender.c 
+RECEIVER_FILES= error.c program_arguments.c connection.c base32.c ./receiver/dns_receiver_events.c ./receiver/dns_receiver.c
+SENDER_FILES= error.c program_arguments.c connection.c base32.c ./sender/dns_sender_events.c ./sender/dns_sender.c 
 
 .PHONY: receiver sender clean
 
