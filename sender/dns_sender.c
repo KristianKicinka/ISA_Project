@@ -35,10 +35,11 @@ int main(int argc, char const *argv[]){
     // Odoslanie init paketu
     sendSenderData(senderArguments, senderArguments->DST_FILEPATH, INIT_PACKET);
 
+
     // Spracovanie data paketu
     loadData(senderArguments);
-    
-    // Odoslanie END paketu
+
+    // // Odoslanie END paketu
     sendSenderData(senderArguments, END_PACKET_DATA, END_PACKET);
 
     // Volanie dns_sender_events funkcie
@@ -81,8 +82,6 @@ void clearSenderData(SenderData *senderData){
  * @param type Typ DNS paketu
  */
 void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketType type){
-    printf("TU SOM\n");
-    fflush(stdout);
     char encoded_data[ENCODE_PAYLOAD_LEN] = {0};
     base32_encode((uint8_t*)dataPayload, strlen(dataPayload), (u_int8_t*)encoded_data, ENCODE_PAYLOAD_LEN);
 
@@ -123,16 +122,14 @@ void loadData(SenderArguments *senderArguments){
     }
    
     while(!feof(filePointer)) {
-        printf("čitanie\n");
-        int loaded = fread(load_buffer, 1, PAYLOAD_LEN, filePointer);
+        int loaded = fread(load_buffer, 1, PAYLOAD_LEN - 1, filePointer);
         load_buffer[loaded] = 0;
-        printf("Loaded data : %s\n",load_buffer);
         sendSenderData(senderArguments, load_buffer, DATA_PACKET);
-        printf("Za sent data\n");
     }
 
     if(filePointer != stdin)
         fclose(filePointer);
+
 }
 
 /**
@@ -204,7 +201,7 @@ void sendDataPacket(char *ip_address, char *data, char *base_host){
 
     sendDataToDnsIP(destination, base_host, data, packet_id, DATA_PACKET);
 
-    // Volanie dns_sender_events funkcie
+    // Volanie dns_sender_events funkcie TODO
     dns_sender__on_chunk_sent(&destination.sin_addr, "filePath", packet_id, sizeof(data));
     printf("Data packet was sent !!\n");
     packet_id++;

@@ -81,14 +81,14 @@ int createDNSquery(unsigned char *query, char *payload, char *base_host){
             }
         }
         
-        query[segment_count * 64 + char_position + 1] = payload[i];
+        query[segment_count * 64 + char_position] = payload[i];
         char_position++;
     }
 
     char base_part[strlen(base_host) + 2];
     translateToDNSquery(base_part, base_host);
 
-    strcat((char*)query,base_part);
+    strcat((char*)query, base_part);
     total_length = strlen(payload) + strlen(base_part) + segment_count;
 
     query[total_length + 1] = (unsigned char) 0;
@@ -153,9 +153,6 @@ void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *data
         proccessError(INTERNAL_ERROR);
     }
 
-    printf("Pred recv from :D \n");
-    fflush(stdout);
-
     int destination_size = sizeof(destination);
     while ((result = recvfrom(sock, (char*)recv_buffer, sizeof(recv_buffer), MSG_WAITALL, (struct sockaddr*) &destination, (socklen_t*)&destination_size))){
         if (errno == EWOULDBLOCK){
@@ -169,8 +166,6 @@ void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *data
         }
     }
 
-    printf("Za recv from :D \n");
-    fflush(stdout);
     (void) recv_buffer;
 }
 
