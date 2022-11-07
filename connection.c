@@ -153,9 +153,12 @@ void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *data
         proccessError(INTERNAL_ERROR);
     }
 
+    printf("Pred recv from :D \n");
+    fflush(stdout);
+
     int destination_size = sizeof(destination);
     while ((result = recvfrom(sock, (char*)recv_buffer, sizeof(recv_buffer), MSG_WAITALL, (struct sockaddr*) &destination, (socklen_t*)&destination_size))){
-        if (result == EWOULDBLOCK){
+        if (errno == EWOULDBLOCK){
             if(sendto(sock,(char*) dns_buffer,sizeof(DnsHeader) + query_length, 0, (struct sockaddr*)&destination, sizeof(destination)) < 0){
                 proccessError(INTERNAL_ERROR);
             }
@@ -166,6 +169,8 @@ void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *data
         }
     }
 
+    printf("Za recv from :D \n");
+    fflush(stdout);
     (void) recv_buffer;
 }
 

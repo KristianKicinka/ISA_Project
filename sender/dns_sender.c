@@ -81,7 +81,8 @@ void clearSenderData(SenderData *senderData){
  * @param type Typ DNS paketu
  */
 void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketType type){
-
+    printf("TU SOM\n");
+    fflush(stdout);
     char encoded_data[ENCODE_PAYLOAD_LEN] = {0};
     base32_encode((uint8_t*)dataPayload, strlen(dataPayload), (u_int8_t*)encoded_data, ENCODE_PAYLOAD_LEN);
 
@@ -110,7 +111,7 @@ void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketT
  */
 void loadData(SenderArguments *senderArguments){
 
-    char load_buffer[PAYLOAD_LEN];
+    char load_buffer[PAYLOAD_LEN] = {0};
     FILE* filePointer;
 
     if (senderArguments->SRC_FILEPATH == NULL)
@@ -122,10 +123,12 @@ void loadData(SenderArguments *senderArguments){
     }
    
     while(!feof(filePointer)) {
+        printf("čitanie\n");
         int loaded = fread(load_buffer, 1, PAYLOAD_LEN, filePointer);
         load_buffer[loaded] = 0;
+        printf("Loaded data : %s\n",load_buffer);
         sendSenderData(senderArguments, load_buffer, DATA_PACKET);
-        
+        printf("Za sent data\n");
     }
 
     if(filePointer != stdin)
@@ -178,7 +181,7 @@ void sendInitPacket(char *ip_address, char *data, char *base_host){
 	destination.sin_addr.s_addr = inet_addr(ip_address);
 
     sendDataToDnsIP(destination, base_host, data, packet_id, INIT_PACKET);
-    
+
     // Volanie dns_sender_events funkcie
     dns_sender__on_transfer_init(&destination.sin_addr);
     printf("Init packet was sent !!\n");
