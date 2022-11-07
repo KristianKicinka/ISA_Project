@@ -11,7 +11,6 @@
 
 #include "dns_sender.h"
 
-#define PORT 8080
 #define PAYLOAD_LEN 128
 #define ENCODE_PAYLOAD_LEN 256
 #define LINE_LEN 300
