@@ -18,6 +18,7 @@
 #include <stdbool.h>
 
 #include "../connection.h"
+#include "dns_receiver_events.h"
 
 void writeToFile(char *path, char *data);
 void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, PacketType type);

@@ -25,6 +25,7 @@
 #include <netdb.h>
 
 #include "../connection.h"
+#include "dns_sender_events.h"
 
 typedef struct senderData_t {
     int socket;

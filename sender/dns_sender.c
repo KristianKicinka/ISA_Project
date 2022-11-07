@@ -21,11 +21,12 @@
 int packet_id = PACKET_ID;
 
 int main(int argc, char const *argv[]){
-    printf("Hello word ISA! from DNS Sender\n");
 
+    printf("----------------------------------------------------\n");
+    printf("################ DNS Sender started ################\n"); 
+    printf("----------------------------------------------------\n");
+    
     SenderArguments *senderArguments = parseSenderArguments(argc, (char**) argv);
-
-    printSenderArguments(senderArguments);
 
     struct sockaddr_in sender;
     memset(&sender, 0, sizeof(sender));
@@ -76,8 +77,6 @@ void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketT
 
     char encoded_data[ENCODE_PAYLOAD_LEN] = {0};
     base32_encode((uint8_t*)dataPayload, strlen(dataPayload), (u_int8_t*)encoded_data, ENCODE_PAYLOAD_LEN);
-
-    printf("Encoded string : %s\n",encoded_data);
     
     if(senderArguments->UPSTREAM_DNS_IP != NULL){
         if (type == INIT_PACKET)
@@ -115,7 +114,6 @@ void loadData(SenderArguments *senderArguments){
     while(!feof(filePointer)) {
         int loaded = fread(load_buffer, 1, PAYLOAD_LEN, filePointer);
         load_buffer[loaded] = 0;
-        printf("-------------------\n%s\n-------------------\n", load_buffer);
         sendSenderData(senderArguments, load_buffer, DATA_PACKET);
         
     }
@@ -170,6 +168,7 @@ void sendInitPacket(char *ip_address, char *data, char *base_host){
 	destination.sin_addr.s_addr = inet_addr(ip_address);
 
     sendDataToDnsIP(destination, base_host, data, packet_id, INIT_PACKET);
+    printf("Init packet was sent!!\n");
     packet_id++;
 }
 
@@ -188,5 +187,6 @@ void sendDataPacket(char *ip_address, char *data, char *base_host){
 	destination.sin_addr.s_addr = inet_addr(ip_address);
 
     sendDataToDnsIP(destination, base_host, data, packet_id, DATA_PACKET);
+    printf("Data packet was sent!!\n");
     packet_id++;
 }

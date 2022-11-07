@@ -24,7 +24,10 @@ char file_path[FILE_PATH_LEN] = {0};
 
 
 int main(int argc, char const *argv[]){
-    printf("Hello word ISA! from DNS Reciever\n");
+
+    printf("----------------------------------------------------\n");
+    printf("############### DNS Receiver started ###############\n");
+    printf("----------------------------------------------------\n");
 
     ReceiverArguments *receiverArguments = parseReceiverArguments(argc, (char**) argv);
 
@@ -83,7 +86,6 @@ int main(int argc, char const *argv[]){
  * @param type Typ spracovávaného paketu
  */
 void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, PacketType type){
-    printf("Data payload : %s \n", data_payload);
     unsigned char decoded_data[DNS_PACKET_LEN] = {0};
     char valid_base_host[DNS_PACKET_LEN] = {0};
 
