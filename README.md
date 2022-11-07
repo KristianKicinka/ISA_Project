@@ -47,7 +47,7 @@ Príklad spustenia DNS receiveru, ako base host je nastavený ```example.com``` 
 ./dns_receiver example.com ./data 
 ```
 
-## Funkcionalita
+## Popis programu
 
 ### Modul DNS Receiver
 Po spustení modulu sa vytvorí a nastaví soket, bindne sa na port 53 a zachytáva DNS komunikáciu. 

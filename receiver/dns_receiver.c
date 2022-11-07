@@ -18,9 +18,12 @@
 #define BASE_32_CHARSET "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
 
 #define INIT_PACKET_CODE 12
-#define DATA_PACKET_CODE 13 
+#define DATA_PACKET_CODE 13
+#define END_PACKET_CODE 14 
 
 char file_path[FILE_PATH_LEN] = {0};
+
+int chunk_id = 0;
 
 
 int main(int argc, char const *argv[]){
@@ -62,10 +65,19 @@ int main(int argc, char const *argv[]){
         DnsHeader *dns_header = (DnsHeader *) recv_buffer;
         char *data_payload = (char*) (recv_buffer + sizeof(DnsHeader));
 
-        if (dns_header->rcode == INIT_PACKET_CODE)
+        if (dns_header->rcode == INIT_PACKET_CODE){
             packet_type = INIT_PACKET;
-        else if (dns_header->rcode == DATA_PACKET_CODE)
+            // Volanie dns_reciever_events funkcie
+            dns_receiver__on_transfer_init(&sender_address.sin_addr);
+        }else if (dns_header->rcode == DATA_PACKET_CODE){
             packet_type = DATA_PACKET;
+            // Volanie dns_reciever_events funkcie
+            dns_receiver__on_chunk_received(&sender_address.sin_addr, file_path, chunk_id, sizeof(data_payload)); 
+        }else if (dns_header->rcode == END_PACKET_CODE){
+            packet_type = END_PACKET;
+            // Volanie dns_reciever_events funkcie
+            dns_receiver__on_transfer_completed(file_path, getFileSize(file_path));
+        }
     
         proccessDataPayload(data_payload, receiverArguments, packet_type);
 
@@ -101,8 +113,13 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
             strcat(file_path, arguments->DST_FILEPATH);
             strcat(file_path, "/");
             strcat(file_path, (char *) decoded_data);
-        }else if (type == DATA_PACKET)
+        }else if (type == DATA_PACKET){
             writeToFile(file_path, (char*) decoded_data);
+            chunk_id++;
+        }else if (type == END_PACKET){
+            return;
+        }
+            
     }
 }
 
@@ -113,13 +130,13 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
  * @param data Dáta, ktoré majú byť zapísané
  */
 void writeToFile(char *path, char *data){
-    FILE *file = fopen(path, "wb");
+    FILE *file = fopen(path, "ab");
     if (file == NULL)
         proccessError(INTERNAL_ERROR);
 
     fprintf(file,"%s",data);
     fclose(file);
-    printf("Data was saved !!\n");
+    printf("Data was written to file !!\n");
 }
 
 /**
@@ -164,4 +181,13 @@ void getDataFromPayload(char *data_payload, unsigned char *data, int data_size){
 
     base32_decode((u_int8_t*) buffer,(u_int8_t*) data, ENCODE_PAYLOAD_LEN);
     
+}
+
+void callParsedQuery(char *data_part, char* base_host){
+    char buffer[DNS_PACKET_LEN] = {0};
+    strcat(buffer,data_part);
+    strcat(buffer, base_host);
+
+    // Volanie dns_reciever_events funkcie
+    dns_receiver__on_query_parsed(file_path, buffer);
 }

@@ -29,6 +29,7 @@
 #include "program_arguments.h"
 #include "base32.h"
 
+
 //  Štruktúra DNS hlavičky
 // All uint16 are in network byte order!!!
 typedef struct __attribute__((__packed__)) dns_header {
@@ -53,6 +54,7 @@ typedef struct __attribute__((__packed__)) dns_header {
 typedef enum {
   INIT_PACKET,
   DATA_PACKET,
+  END_PACKET,
 } PacketType;
 
 void initSenderDNSheader(unsigned char *buffer, int packet_id, PacketType type);
@@ -61,5 +63,6 @@ void translateToDNSquery(char* query, char *data);
 void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *dataPayload, int packet_id, PacketType type);
 void sendData(int sock, char *data, int size, struct sockaddr_in server, socklen_t len);
 int createDNSquery(unsigned char *query, char *payload, char *base_host);
+int getFileSize(char *file_path);
 
 #endif // CONNECTION_H

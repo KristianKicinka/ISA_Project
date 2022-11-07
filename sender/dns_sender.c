@@ -15,8 +15,9 @@
 #define PAYLOAD_LEN 128
 #define ENCODE_PAYLOAD_LEN 256
 #define LINE_LEN 300
-#define DNS_PORT 53 
+#define DNS_PORT 53
 #define PACKET_ID 1444
+#define END_PACKET_DATA "END_PACKET" 
 
 int packet_id = PACKET_ID;
 
@@ -36,6 +37,12 @@ int main(int argc, char const *argv[]){
 
     // Spracovanie data paketu
     loadData(senderArguments);
+    
+    // Odoslanie END paketu
+    sendSenderData(senderArguments, END_PACKET_DATA, END_PACKET);
+
+    // Volanie dns_sender_events funkcie
+    //dns_sender__on_transfer_completed(senderArguments->DST_FILEPATH, file_size);
 
     clearSenderArguments(senderArguments);
 
@@ -77,6 +84,9 @@ void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketT
 
     char encoded_data[ENCODE_PAYLOAD_LEN] = {0};
     base32_encode((uint8_t*)dataPayload, strlen(dataPayload), (u_int8_t*)encoded_data, ENCODE_PAYLOAD_LEN);
+
+    // Volanie dns_sender_events funkcie
+    dns_sender__on_chunk_encoded(senderArguments->DST_FILEPATH, packet_id, encoded_data);
     
     if(senderArguments->UPSTREAM_DNS_IP != NULL){
         if (type == INIT_PACKET)
@@ -168,6 +178,9 @@ void sendInitPacket(char *ip_address, char *data, char *base_host){
 	destination.sin_addr.s_addr = inet_addr(ip_address);
 
     sendDataToDnsIP(destination, base_host, data, packet_id, INIT_PACKET);
+    
+    // Volanie dns_sender_events funkcie
+    dns_sender__on_transfer_init(&destination.sin_addr);
     printf("Init packet was sent !!\n");
     packet_id++;
 }
@@ -187,6 +200,29 @@ void sendDataPacket(char *ip_address, char *data, char *base_host){
 	destination.sin_addr.s_addr = inet_addr(ip_address);
 
     sendDataToDnsIP(destination, base_host, data, packet_id, DATA_PACKET);
+
+    // Volanie dns_sender_events funkcie
+    dns_sender__on_chunk_sent(&destination.sin_addr, "filePath", packet_id, sizeof(data));
     printf("Data packet was sent !!\n");
+    packet_id++;
+}
+
+/**
+ * @brief Funkcia zabezpečuje nastavenie a odoslanie DNS end paketu
+ * 
+ * @param ip_address IP adresa DNS serveru (prijímateľa)
+ * @param data Dáta DNS paketu
+ * @param base_host Base host zadaný ako parameter skriptu
+ */
+void sendEndPacket(char *ip_address, char *data, char *base_host){
+    struct sockaddr_in destination;
+
+    destination.sin_family = AF_INET;
+	destination.sin_port = htons(DNS_PORT);
+	destination.sin_addr.s_addr = inet_addr(ip_address);
+
+    sendDataToDnsIP(destination, base_host, data, packet_id, END_PACKET);
+
+    printf("End packet was sent !!\n");
     packet_id++;
 }

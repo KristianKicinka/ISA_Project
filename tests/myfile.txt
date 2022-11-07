@@ -1,4 +1,0 @@
-SomeSampleData
-Because
-Why
-not

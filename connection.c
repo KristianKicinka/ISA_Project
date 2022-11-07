@@ -16,7 +16,8 @@
 #define DNS_PACKET_LEN 512
 
 #define INIT_PACKET_CODE 12
-#define DATA_PACKET_CODE 13  
+#define DATA_PACKET_CODE 13
+#define END_PACKET_CODE 14 
 
 
 /**
@@ -37,7 +38,8 @@ void initSenderDNSheader(unsigned char *buffer, int packet_id, PacketType type){
         dns_header->rcode = INIT_PACKET_CODE;
     else if (type == DATA_PACKET)
         dns_header->rcode = DATA_PACKET_CODE;
-    
+    else if (type == END_PACKET)
+        dns_header->rcode = END_PACKET_CODE;
 }
 
 /**
@@ -165,4 +167,18 @@ void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *data
     }
 
     (void) recv_buffer;
+}
+
+int getFileSize(char *file_path){
+    FILE *file = fopen(file_path, "r");
+
+    if (file == NULL)
+        proccessError(INTERNAL_ERROR);
+    
+    fseek(file, 0L, SEEK_END);
+  
+    int res = ftell(file);
+  
+    fclose(file);
+    return res;  
 }
