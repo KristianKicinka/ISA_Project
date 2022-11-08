@@ -1,5 +1,8 @@
 # ISA Projekt
 ## Tunelovanie dátových prenosov cez DNS dotazy
+#
+Autor : Kristián Kičinka (xkicin02)<br>
+Dátum vytvorenia : 7.11.2022
 
 ## Build
 Pred prvým spustením programu je nutné prejsť do adresára, kde sú cieľové skripty uložené a 
@@ -52,4 +55,28 @@ Príklad spustenia DNS receiveru, ako base host je nastavený ```example.com``` 
 ### Modul DNS Receiver
 Po spustení modulu sa vytvorí a nastaví soket, bindne sa na port 53 a zachytáva DNS komunikáciu. 
 Po zachytení paketu dochádza k spracovaniu paketu. Získa sa base host a porovná sa s basehostom zadaným ako parameter modulu. Ak sa base host zhoduje, následne sa pristupuje k dekódovaniu dát z paketu. Ak ide o init paket, dáta obsahujú cestu k súboru do ktorého majú byť dáta uložené. Pri data pakete paket nesie samotné dáta, ktoré sa následne uložia do súboru.
+
+## Zoznam odovzdávaných súborov
+- Sender
+  - dns_sender.h
+  - dns_sender.c
+  - dns_sender_events.h
+  - dns_sender_events.c
+- Reciever
+  - dns_receiver.h
+  - dns_receiver.c
+  - dns_receiver_events.h
+  - dns_receiver_events.c
+- base32.h
+- base32.c
+- connection.h
+- connection.c
+- error.h
+- error.c
+- program_arguments.h
+- program_arguments.c
+- README.md
+- Makefile
+
+
 
