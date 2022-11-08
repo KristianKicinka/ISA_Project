@@ -1,6 +1,5 @@
 # ISA Projekt
 ## Tunelovanie dátových prenosov cez DNS dotazy
-#
 Autor : Kristián Kičinka (xkicin02)<br>
 Dátum vytvorenia : 7.11.2022
 #
