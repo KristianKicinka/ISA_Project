@@ -3,7 +3,7 @@
 #
 Autor : Kristián Kičinka (xkicin02)<br>
 Dátum vytvorenia : 7.11.2022
-
+#
 ## Build
 Pred prvým spustením programu je nutné prejsť do adresára, kde sú cieľové skripty uložené a 
 za pomoci príkazu make preložiť skripty.
@@ -55,6 +55,9 @@ Príklad spustenia DNS receiveru, ako base host je nastavený ```example.com``` 
 ### Modul DNS Receiver
 Po spustení modulu sa vytvorí a nastaví soket, bindne sa na port 53 a zachytáva DNS komunikáciu. 
 Po zachytení paketu dochádza k spracovaniu paketu. Získa sa base host a porovná sa s basehostom zadaným ako parameter modulu. Ak sa base host zhoduje, následne sa pristupuje k dekódovaniu dát z paketu. Ak ide o init paket, dáta obsahujú cestu k súboru do ktorého majú byť dáta uložené. Pri data pakete paket nesie samotné dáta, ktoré sa následne uložia do súboru.
+
+### Modul DNS Sender
+Po spustení modulu sa vatvorí a nastaví soket, následne sa vytvorí a inicializuje DNS hlavička. Hlavička sa vloží do DNS paketu reprezentovaného bufferom. Ako prvý sa posiela init paket, obsahujúci cestu k súboru. Po odoslaní akéhokoľvek paketu sa čaká na response od receivera. Ak dorazila odpoveď na init prechádza sa k čítaniu dát zo vstupu. Pred tým ako sa dáta posielajú je nutné ich rozdeliť, zakódovať a vytvoriť DNS query. To platí aj v prípade init paketu. Ak je vstupný súbor odoslaný a spracovaný sender vysiela end packet, ktorý signalizuje recieveru, že prenos dát je dokončený. Po odoslaní end paketu sender ukončuje svoju činnosť.
 
 ## Zoznam odovzdávaných súborov
 - Sender
