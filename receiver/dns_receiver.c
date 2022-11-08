@@ -110,6 +110,7 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
 
     if (!strcmp(recieved_base_host, valid_base_host)){
         if (type == INIT_PACKET){
+            strcpy(file_path,"");
             strcat(file_path, arguments->DST_FILEPATH);
             strcat(file_path, "/");
             strcat(file_path, (char *) decoded_data);

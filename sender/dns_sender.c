@@ -19,6 +19,7 @@
 #define END_PACKET_DATA "END_PACKET" 
 
 int packet_id = PACKET_ID;
+int chunk_id = 0;
 
 int main(int argc, char const *argv[]){
 
@@ -207,6 +208,7 @@ void sendDataPacket(char *ip_address, char *data, char *base_host){
     // Volanie dns_sender_events funkcie TODO
     dns_sender__on_chunk_sent(&destination.sin_addr, "filePath", packet_id, sizeof(data));
     printf("Data packet was sent !!\n");
+    chunk_id++;
     packet_id++;
 }
 
