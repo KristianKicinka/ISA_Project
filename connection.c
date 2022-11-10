@@ -11,15 +11,6 @@
 
 #include "connection.h"
 
-#define PACKET_ID 1444
-#define DNS_PORT 53
-#define DNS_PACKET_LEN 512
-
-#define INIT_PACKET_CODE 12
-#define DATA_PACKET_CODE 13
-#define END_PACKET_CODE 14 
-
-
 /**
  * @brief Funkcia zabezpečuje vytvorenie a nastavenie hlavičky DNS paketu
  * 
@@ -49,8 +40,11 @@ void initSenderDNSheader(unsigned char *buffer, int packet_id, PacketType type){
  */
 int createSocket(){
     int sock;
-    if ((sock = socket(AF_INET , SOCK_DGRAM , IPPROTO_UDP)) == -1)
-        proccessError(INTERNAL_ERROR);
+    if ((sock = socket(AF_INET , SOCK_DGRAM , IPPROTO_UDP)) == -1){
+        perror("sock");
+        proccessError(BASE_HOST_ERROR);
+    }
+        
     return sock;
 }
 
@@ -63,22 +57,23 @@ int createSocket(){
  * @return int Dĺžka DNS query
  */
 int createDNSquery(unsigned char *query, char *payload, char *base_host){
-    int char_position = 0;
+    /*int char_position = 0;
     int segment_count = 0;
     int total_length = 0;
-    
+    *query = 63;
+    query++;
     for (int i = 0; i < strlen(payload); i++){
         if (char_position == 63 || i == 0){
             int remaining_payload = strlen(payload) - (segment_count * 63);
-            if (remaining_payload > 63)
-                query[segment_count * 64 + char_position ] = (unsigned char) 63;
-            else
-                query[segment_count * 64 + char_position ] = (unsigned char) remaining_payload;
-
-            char_position = 0;
             if (i != 0){
                 segment_count++;
             }
+            if (remaining_payload > 63)
+                query[segment_count * 64] = (unsigned char) 63;
+            else
+                query[segment_count * 64] = (unsigned char) remaining_payload;
+
+            char_position = 0;
         }
         
         query[segment_count * 64 + char_position] = payload[i];
@@ -91,14 +86,51 @@ int createDNSquery(unsigned char *query, char *payload, char *base_host){
     strcat((char*)query, base_part);
     total_length = strlen(payload) + strlen(base_part) + segment_count;
 
-    query[total_length + 1] = (unsigned char) 0;
+    query[++total_length] = (unsigned char) 0;
 
-    query[total_length + 2] = (unsigned char) 0;
-    query[total_length + 3] = (unsigned char) 1;
-    query[total_length + 4] = (unsigned char) 0;
-    query[total_length + 5] = (unsigned char) 1;
+    query[++total_length] = (unsigned char) 0;
+    query[++total_length] = (unsigned char) 1;
+    query[++total_length] = (unsigned char) 0;
+    query[++total_length] = (unsigned char) 1;
     
-    return total_length + 6;
+    return ++total_length;
+    */
+
+    int bytes_to_write = strlen(payload);
+    int segment_count = 0;
+    bool last_label = false;
+    unsigned char *current_query_position = query;
+
+    while (!last_label){
+        if (bytes_to_write > 63){
+            *current_query_position++ = 63;
+            for (int i = 0; i < 63; i++){
+                *current_query_position++ = payload[segment_count * 63 + i];
+            }
+            bytes_to_write -= 63;
+            segment_count++;
+        }else{
+            last_label = true;
+            *current_query_position++ = bytes_to_write;
+            for (int i = 0; i < bytes_to_write; i++){
+                *current_query_position++ = payload[segment_count * 63 + i];
+            }   
+        } 
+    }
+
+    char base_part[strlen(base_host) + 2];
+    translateToDNSquery(base_part, base_host);
+
+    strcat((char*) query,base_part);
+    current_query_position += strlen(base_part) + 1;
+
+    *current_query_position++ = (unsigned char) 0;
+    *current_query_position++ = (unsigned char) 0;
+    *current_query_position++ = (unsigned char) 1;
+    *current_query_position++ = (unsigned char) 0;
+    *current_query_position = (unsigned char) 1;
+
+    return current_query_position - query;
 }
 
 /**
@@ -166,6 +198,7 @@ void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *data
         }
     }
 
+    close(sock);
     (void) recv_buffer;
 }
 

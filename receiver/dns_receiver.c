@@ -11,15 +11,8 @@
 
 #include "dns_receiver.h"
 
-#define DNS_PORT 53
-#define DNS_PACKET_LEN 512
-#define FILE_PATH_LEN 1024 
-#define ENCODE_PAYLOAD_LEN 256
+#define FILE_PATH_LEN 1024
 #define BASE_32_CHARSET "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
-
-#define INIT_PACKET_CODE 12
-#define DATA_PACKET_CODE 13
-#define END_PACKET_CODE 14 
 
 char file_path[FILE_PATH_LEN] = {0};
 

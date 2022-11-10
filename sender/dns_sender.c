@@ -11,11 +11,7 @@
 
 #include "dns_sender.h"
 
-#define PAYLOAD_LEN 128
-#define ENCODE_PAYLOAD_LEN 256
 #define LINE_LEN 300
-#define DNS_PORT 53
-#define PACKET_ID 1444
 #define END_PACKET_DATA "END_PACKET" 
 
 int packet_id = PACKET_ID;
@@ -34,14 +30,14 @@ int main(int argc, char const *argv[]){
     memset(&sender, 0, sizeof(sender));
 
     // Odoslanie init paketu
-    sendSenderData(senderArguments, senderArguments->DST_FILEPATH, INIT_PACKET);
+    sendSenderData(senderArguments, senderArguments->DST_FILEPATH, strlen(senderArguments->DST_FILEPATH), INIT_PACKET);
 
 
     // Spracovanie data paketu
     loadData(senderArguments);
 
     // // Odoslanie END paketu
-    sendSenderData(senderArguments, END_PACKET_DATA, END_PACKET);
+    sendSenderData(senderArguments, END_PACKET_DATA, strlen(END_PACKET_DATA), END_PACKET);
 
     // Volanie dns_sender_events funkcie
     dns_sender__on_transfer_completed(senderArguments->DST_FILEPATH, file_size);
@@ -82,17 +78,15 @@ void clearSenderData(SenderData *senderData){
  * @param dataPayload Dátová časť payloadu
  * @param type Typ DNS paketu
  */
-void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketType type){
+void sendSenderData(SenderArguments *senderArguments, char *dataPayload, int payload_size , PacketType type){
     char encoded_data[ENCODE_PAYLOAD_LEN] = {0};
     char chunk_data[ENCODE_PAYLOAD_LEN * 2] = {0};
 
-    base32_encode((uint8_t*)dataPayload, strlen(dataPayload), (u_int8_t*)encoded_data, ENCODE_PAYLOAD_LEN);
+    base32_encode((uint8_t*)dataPayload, payload_size, (u_int8_t*)encoded_data, ENCODE_PAYLOAD_LEN);
 
     strcat(chunk_data, encoded_data);
     strcat(chunk_data,".");
     strcat(chunk_data, senderArguments->BASE_HOST);
-
-    int chunk_size = strlen(dataPayload);
 
     if(senderArguments->UPSTREAM_DNS_IP != NULL){
         if (type == INIT_PACKET)
@@ -100,7 +94,7 @@ void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketT
         else if(type == DATA_PACKET){
             // Volanie dns_sender_events funkcie
             dns_sender__on_chunk_encoded(senderArguments->DST_FILEPATH, chunk_id, chunk_data);
-            sendDataPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST, senderArguments->DST_FILEPATH, chunk_size);
+            sendDataPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST, senderArguments->DST_FILEPATH, payload_size);
         }else if (type == END_PACKET)
             sendEndPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
     }else{
@@ -110,7 +104,7 @@ void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketT
         else if(type == DATA_PACKET){
             // Volanie dns_sender_events funkcie
             dns_sender__on_chunk_encoded(senderArguments->DST_FILEPATH, chunk_id, chunk_data);
-            sendDataPacket(dns_ip, encoded_data, senderArguments->BASE_HOST, senderArguments->DST_FILEPATH, chunk_size);
+            sendDataPacket(dns_ip, encoded_data, senderArguments->BASE_HOST, senderArguments->DST_FILEPATH, payload_size);
         }else if (type == END_PACKET)
             sendEndPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
     }
@@ -139,7 +133,7 @@ void loadData(SenderArguments *senderArguments){
         int loaded = fread(load_buffer, 1, PAYLOAD_LEN - 1, filePointer);
         load_buffer[loaded] = 0;
         file_size += loaded; 
-        sendSenderData(senderArguments, load_buffer, DATA_PACKET);
+        sendSenderData(senderArguments, load_buffer, loaded, DATA_PACKET);
     }
 
     if(filePointer != stdin)
@@ -220,7 +214,7 @@ void sendDataPacket(char *ip_address, char *data, char *base_host, char * file_p
     sendDataToDnsIP(destination, base_host, data, packet_id, DATA_PACKET);
 
     // Volanie dns_sender_events funkcie TODO
-    dns_sender__on_chunk_sent(&destination.sin_addr, file_path, chunk_id, chunk_size); //TODO
+    dns_sender__on_chunk_sent(&destination.sin_addr, file_path, chunk_id, chunk_size);
     printf("[INFO] Data packet was sent !!\n");
     chunk_id++;
     packet_id++;

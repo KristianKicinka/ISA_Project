@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include <unistd.h> 
+#include <stdbool.h>
 
 #include <sys/types.h> 
 #include <sys/socket.h>
@@ -28,6 +29,18 @@
 
 #include "program_arguments.h"
 #include "base32.h"
+
+#define PACKET_ID 1444
+
+#define DNS_PORT 53
+#define DNS_PACKET_LEN 512
+
+#define INIT_PACKET_CODE 12
+#define DATA_PACKET_CODE 13
+#define END_PACKET_CODE 14
+
+#define PAYLOAD_LEN 100
+#define ENCODE_PAYLOAD_LEN 200
 
 
 //  Štruktúra DNS hlavičky

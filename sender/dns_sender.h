@@ -34,7 +34,7 @@ typedef struct senderData_t {
 
 SenderData *initSenderData();
 void clearSenderData(SenderData *senderData);
-void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketType type);
+void sendSenderData(SenderArguments *senderArguments, char *dataPayload, int payload_size , PacketType type);
 void sendInitPacket(char *ip_address, char *data, char *base_host);
 void sendDataPacket(char *ip_address, char *data, char *base_host, char *file_path, int chunk_size);
 void sendEndPacket(char *ip_address, char *data, char *base_host);
