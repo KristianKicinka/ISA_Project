@@ -20,6 +20,7 @@
 
 int packet_id = PACKET_ID;
 int chunk_id = 0;
+int file_size = 0;
 
 int main(int argc, char const *argv[]){
 
@@ -43,7 +44,7 @@ int main(int argc, char const *argv[]){
     sendSenderData(senderArguments, END_PACKET_DATA, END_PACKET);
 
     // Volanie dns_sender_events funkcie
-    //dns_sender__on_transfer_completed(senderArguments->DST_FILEPATH, file_size);
+    dns_sender__on_transfer_completed(senderArguments->DST_FILEPATH, file_size);
 
     clearSenderArguments(senderArguments);
 
@@ -83,25 +84,34 @@ void clearSenderData(SenderData *senderData){
  */
 void sendSenderData(SenderArguments *senderArguments, char *dataPayload, PacketType type){
     char encoded_data[ENCODE_PAYLOAD_LEN] = {0};
+    char chunk_data[ENCODE_PAYLOAD_LEN * 2] = {0};
+
     base32_encode((uint8_t*)dataPayload, strlen(dataPayload), (u_int8_t*)encoded_data, ENCODE_PAYLOAD_LEN);
 
-    // Volanie dns_sender_events funkcie
-    dns_sender__on_chunk_encoded(senderArguments->DST_FILEPATH, packet_id, encoded_data);
-    
+    strcat(chunk_data, encoded_data);
+    strcat(chunk_data,".");
+    strcat(chunk_data, senderArguments->BASE_HOST);
+
+    int chunk_size = strlen(dataPayload);
+
     if(senderArguments->UPSTREAM_DNS_IP != NULL){
         if (type == INIT_PACKET)
             sendInitPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
-        else if(type == DATA_PACKET)
-            sendDataPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
-        else if (type == END_PACKET)
+        else if(type == DATA_PACKET){
+            // Volanie dns_sender_events funkcie
+            dns_sender__on_chunk_encoded(senderArguments->DST_FILEPATH, chunk_id, chunk_data);
+            sendDataPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST, senderArguments->DST_FILEPATH, chunk_size);
+        }else if (type == END_PACKET)
             sendEndPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
     }else{
         char *dns_ip = getImplicitDNSserverIP();
         if (type == INIT_PACKET)
             sendInitPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
-        else if(type == DATA_PACKET)
-            sendDataPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
-        else if (type == END_PACKET)
+        else if(type == DATA_PACKET){
+            // Volanie dns_sender_events funkcie
+            dns_sender__on_chunk_encoded(senderArguments->DST_FILEPATH, chunk_id, chunk_data);
+            sendDataPacket(dns_ip, encoded_data, senderArguments->BASE_HOST, senderArguments->DST_FILEPATH, chunk_size);
+        }else if (type == END_PACKET)
             sendEndPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
     }
 
@@ -128,6 +138,7 @@ void loadData(SenderArguments *senderArguments){
     while(!feof(filePointer)) {
         int loaded = fread(load_buffer, 1, PAYLOAD_LEN - 1, filePointer);
         load_buffer[loaded] = 0;
+        file_size += loaded; 
         sendSenderData(senderArguments, load_buffer, DATA_PACKET);
     }
 
@@ -199,7 +210,7 @@ void sendInitPacket(char *ip_address, char *data, char *base_host){
  * @param data Dáta DNS paketu
  * @param base_host Base host zadaný ako parameter skriptu
  */
-void sendDataPacket(char *ip_address, char *data, char *base_host){
+void sendDataPacket(char *ip_address, char *data, char *base_host, char * file_path, int chunk_size){
     struct sockaddr_in destination;
 
     destination.sin_family = AF_INET;
@@ -209,7 +220,7 @@ void sendDataPacket(char *ip_address, char *data, char *base_host){
     sendDataToDnsIP(destination, base_host, data, packet_id, DATA_PACKET);
 
     // Volanie dns_sender_events funkcie TODO
-    dns_sender__on_chunk_sent(&destination.sin_addr, "filePath", packet_id, sizeof(data)); //TODO
+    dns_sender__on_chunk_sent(&destination.sin_addr, file_path, chunk_id, chunk_size); //TODO
     printf("[INFO] Data packet was sent !!\n");
     chunk_id++;
     packet_id++;

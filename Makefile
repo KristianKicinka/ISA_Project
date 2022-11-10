@@ -12,7 +12,7 @@ receiver: $(RECEIVER_FILES)
 
 sender: $(SENDER_FILES)
 	$(CC) $(CFLAGS) -o dns_sender $(SENDER_FILES)
-	clear
+
 	
 clean:
 	@rm -f dns_receiver

@@ -53,7 +53,7 @@ int main(int argc, char const *argv[]){
     receiver.sin_addr.s_addr = htonl(INADDR_ANY);              
     receiver.sin_port =  htons(DNS_PORT);
     
-    if (bind(sock, (struct sockaddr *)&receiver, sizeof(receiver)) == -1) // binding with the port
+    if (bind(sock, (struct sockaddr *)&receiver, sizeof(receiver)) == -1)
         proccessError(INTERNAL_ERROR);
 
     length = sizeof(sender_address);
@@ -71,15 +71,13 @@ int main(int argc, char const *argv[]){
             dns_receiver__on_transfer_init(&sender_address.sin_addr);
         }else if (dns_header->rcode == DATA_PACKET_CODE){
             packet_type = DATA_PACKET;
-            // Volanie dns_reciever_events funkcie
-            dns_receiver__on_chunk_received(&sender_address.sin_addr, file_path, chunk_id, sizeof(data_payload)); 
         }else if (dns_header->rcode == END_PACKET_CODE){
             packet_type = END_PACKET;
             // Volanie dns_reciever_events funkcie
             dns_receiver__on_transfer_completed(file_path, getFileSize(file_path));
         }
     
-        proccessDataPayload(data_payload, receiverArguments, packet_type);
+        proccessDataPayload(data_payload, receiverArguments, &sender_address.sin_addr, packet_type);
 
         // send response
         sendConfirmPacket(sock, sender_address, recv_buffer);
@@ -97,14 +95,14 @@ int main(int argc, char const *argv[]){
  * @param arguments Argumenty skriptu dns_reciever
  * @param type Typ spracovávaného paketu
  */
-void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, PacketType type){
+void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, struct in_addr *address, PacketType type){
     unsigned char decoded_data[DNS_PACKET_LEN] = {0};
     char valid_base_host[DNS_PACKET_LEN] = {0};
 
     int data_length = strlen(data_payload) - strlen(arguments->BASE_HOST) - 1;
     char *recieved_base_host = (char *)(data_payload + data_length);
 
-    int decoded_data_size = getDataFromPayload(data_payload, decoded_data, data_length);
+    int decoded_data_size = getDataFromPayload(data_payload, decoded_data, data_length, arguments->BASE_HOST, type);
 
     translateToDNSquery(valid_base_host, arguments->BASE_HOST);
 
@@ -116,10 +114,12 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, Packe
             strcat(file_path, (char *) decoded_data);
             remove(file_path);
         }else if (type == DATA_PACKET){
+            // Volanie dns_reciever_events funkcie
+            dns_receiver__on_chunk_received(address, file_path, chunk_id, decoded_data_size); 
             writeToFile(file_path, (char*) decoded_data, decoded_data_size);
             chunk_id++;
         }else if (type == END_PACKET){
-            return;
+            chunk_id = 0;
         }
             
     }
@@ -169,7 +169,7 @@ void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_pa
  * @param data Pole do ktorého sa uložia spracované dáta
  * @param data_size Veľkosť data_payloadu
  */
-int getDataFromPayload(char *data_payload, unsigned char *data, int data_size){
+int getDataFromPayload(char *data_payload, unsigned char *data, int data_size, char *base_host, PacketType type){
     unsigned char buffer[DNS_PACKET_LEN] = {0};
     int buffer_cnt = 0;
 
@@ -181,12 +181,19 @@ int getDataFromPayload(char *data_payload, unsigned char *data, int data_size){
         }
     }
 
+    if (type == DATA_PACKET){
+        // Volanie dns_reciever_events funkcie
+        callParsedQuery((char*) buffer, base_host);
+    }
+
+
     return base32_decode((u_int8_t*) buffer,(u_int8_t*) data, ENCODE_PAYLOAD_LEN);   
 }
 
 void callParsedQuery(char *data_part, char* base_host){
-    char buffer[DNS_PACKET_LEN] = {0};
-    strcat(buffer,data_part);
+    char buffer[DNS_PACKET_LEN * 2] = {0};
+    strcat(buffer, data_part);
+    strcat(buffer, ".");
     strcat(buffer, base_host);
 
     // Volanie dns_reciever_events funkcie

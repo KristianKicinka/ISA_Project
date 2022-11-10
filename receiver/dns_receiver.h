@@ -21,10 +21,11 @@
 #include "dns_receiver_events.h"
 
 void writeToFile(char *path, char *data, int data_size);
-void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, PacketType type);
+void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, struct in_addr *address, PacketType type);
 void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_packet);
 void convertDNSQuery(char *data);
-int getDataFromPayload(char *data_payload, unsigned char *data, int data_size);
+int getDataFromPayload(char *data_payload, unsigned char *data, int data_size, char *base_host, PacketType type);
+void callParsedQuery(char *data_part, char* base_host);
 
 
 #endif // DNS_RECEIVER_H
