@@ -139,6 +139,9 @@ void loadData(SenderArguments *senderArguments){
 /**
  * @brief Funkcia zabezpečuje získanie IP DNS serveru z resolv.conf súboru
  * 
+ * Funkcia inšpirovaná zdrojom: 
+ *      https://www.binarytides.com/dns-query-code-in-c-with-linux-sockets/
+ * 
  * @return char* IP adresa
  */
 char *getImplicitDNSserverIP(){
@@ -158,7 +161,7 @@ char *getImplicitDNSserverIP(){
             if (!strcmp(line_start, "nameserver")){
                 parse_item = strtok(line," ");
                 parse_item = strtok(NULL," ");
-                parse_item[strlen(parse_item) - 1] = 0; // Delete /n from end
+                parse_item[strlen(parse_item) - 1] = 0;
                 return parse_item;
             }
             
@@ -185,7 +188,7 @@ void sendInitPacket(char *ip_address, char *data, char *base_host){
 
     // Volanie dns_sender_events funkcie
     dns_sender__on_transfer_init(&destination.sin_addr);
-    printf("Init packet was sent !!\n");
+    printf("[INFO] Init packet was sent !!\n");
     packet_id++;
 }
 
@@ -206,8 +209,8 @@ void sendDataPacket(char *ip_address, char *data, char *base_host){
     sendDataToDnsIP(destination, base_host, data, packet_id, DATA_PACKET);
 
     // Volanie dns_sender_events funkcie TODO
-    dns_sender__on_chunk_sent(&destination.sin_addr, "filePath", packet_id, sizeof(data));
-    printf("Data packet was sent !!\n");
+    dns_sender__on_chunk_sent(&destination.sin_addr, "filePath", packet_id, sizeof(data)); //TODO
+    printf("[INFO] Data packet was sent !!\n");
     chunk_id++;
     packet_id++;
 }
@@ -228,6 +231,6 @@ void sendEndPacket(char *ip_address, char *data, char *base_host){
 
     sendDataToDnsIP(destination, base_host, data, packet_id, END_PACKET);
 
-    printf("End packet was sent !!\n");
+    printf("[INFO] End packet was sent !!\n");
     packet_id++;
 }

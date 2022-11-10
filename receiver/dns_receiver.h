@@ -18,14 +18,12 @@
 #include <stdbool.h>
 
 #include "../connection.h"
-
 #include "dns_receiver_events.h"
 
 void writeToFile(char *path, char *data, int data_size);
 void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, PacketType type);
 void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_packet);
 void convertDNSQuery(char *data);
-
 int getDataFromPayload(char *data_payload, unsigned char *data, int data_size);
 
 

@@ -138,7 +138,7 @@ void writeToFile(char *path, char *data, int data_size){
 
     fwrite(data, 1, data_size, file);
     fclose(file);
-    printf("Data was written to file !!\n");
+    printf("[INFO] Data was written to file !!\n");
 }
 
 /**
@@ -181,8 +181,7 @@ int getDataFromPayload(char *data_payload, unsigned char *data, int data_size){
         }
     }
 
-    return base32_decode((u_int8_t*) buffer,(u_int8_t*) data, ENCODE_PAYLOAD_LEN);
-    
+    return base32_decode((u_int8_t*) buffer,(u_int8_t*) data, ENCODE_PAYLOAD_LEN);   
 }
 
 void callParsedQuery(char *data_part, char* base_host){

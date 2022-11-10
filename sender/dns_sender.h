@@ -41,7 +41,4 @@ void sendEndPacket(char *ip_address, char *data, char *base_host);
 void loadData(SenderArguments *senderArguments);
 char *getImplicitDNSserverIP();
 
-
-
-
 #endif // DNS_SENDER_H
