@@ -43,8 +43,14 @@
 #define ENCODE_PAYLOAD_LEN 200
 
 
-//  Štruktúra DNS hlavičky
-// All uint16 are in network byte order!!!
+/**
+ * @brief Štruktúra DNS hlavičky
+ * 
+ * Štruktúra inšpirovaná zdrojom:
+ *     https://github.com/tbenbrahim/dns-tunneling-poc/blob/main/src/dns.h
+ * 
+ * @return typedef struct 
+ */
 typedef struct __attribute__((__packed__)) dns_header {
   uint16_t id;
 

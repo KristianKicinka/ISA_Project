@@ -57,45 +57,7 @@ int createSocket(){
  * @return int Dĺžka DNS query
  */
 int createDNSquery(unsigned char *query, char *payload, char *base_host){
-    /*int char_position = 0;
-    int segment_count = 0;
-    int total_length = 0;
-    *query = 63;
-    query++;
-    for (int i = 0; i < strlen(payload); i++){
-        if (char_position == 63 || i == 0){
-            int remaining_payload = strlen(payload) - (segment_count * 63);
-            if (i != 0){
-                segment_count++;
-            }
-            if (remaining_payload > 63)
-                query[segment_count * 64] = (unsigned char) 63;
-            else
-                query[segment_count * 64] = (unsigned char) remaining_payload;
-
-            char_position = 0;
-        }
-        
-        query[segment_count * 64 + char_position] = payload[i];
-        char_position++;
-    }
-
-    char base_part[strlen(base_host) + 2];
-    translateToDNSquery(base_part, base_host);
-
-    strcat((char*)query, base_part);
-    total_length = strlen(payload) + strlen(base_part) + segment_count;
-
-    query[++total_length] = (unsigned char) 0;
-
-    query[++total_length] = (unsigned char) 0;
-    query[++total_length] = (unsigned char) 1;
-    query[++total_length] = (unsigned char) 0;
-    query[++total_length] = (unsigned char) 1;
     
-    return ++total_length;
-    */
-
     int bytes_to_write = strlen(payload);
     int segment_count = 0;
     bool last_label = false;
@@ -202,6 +164,12 @@ void sendDataToDnsIP(struct sockaddr_in destination, char *base_host, char *data
     (void) recv_buffer;
 }
 
+/**
+ * @brief Funkcia zabezpečuje získanie veľkosti zadaného súboru
+ * 
+ * @param file_path Cesta k súboru
+ * @return int Veľkosť súboru
+ */
 int getFileSize(char *file_path){
     FILE *file = fopen(file_path, "r");
 

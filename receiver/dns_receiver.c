@@ -86,6 +86,7 @@ int main(int argc, char const *argv[]){
  * 
  * @param data_payload Buffer obsahujúci dáta
  * @param arguments Argumenty skriptu dns_reciever
+ * @param address Štruktúra obsahujúca adresu prijímateľa
  * @param type Typ spracovávaného paketu
  */
 void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, struct in_addr *address, PacketType type){
@@ -123,6 +124,7 @@ void proccessDataPayload(char *data_payload, ReceiverArguments *arguments, struc
  * 
  * @param path Cesta k súboru
  * @param data Dáta, ktoré majú byť zapísané
+ * @param data_size Veľkosť dát
  */
 void writeToFile(char *path, char *data, int data_size){
     FILE *file = fopen(path, "ab");
@@ -161,6 +163,8 @@ void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_pa
  * @param data_payload Buffer obsahujúci dáta
  * @param data Pole do ktorého sa uložia spracované dáta
  * @param data_size Veľkosť data_payloadu
+ * @param base_host Base host zadaný používateľom
+ * @param type Typ paketu
  */
 int getDataFromPayload(char *data_payload, unsigned char *data, int data_size, char *base_host, PacketType type){
     unsigned char buffer[DNS_PACKET_LEN] = {0};
@@ -179,10 +183,15 @@ int getDataFromPayload(char *data_payload, unsigned char *data, int data_size, c
         callParsedQuery((char*) buffer, base_host);
     }
 
-
     return base32_decode((u_int8_t*) buffer,(u_int8_t*) data, ENCODE_PAYLOAD_LEN);   
 }
 
+/**
+ * @brief Funkcia zabezpečuje obsluhu k volaniu funkcie zo zadaného rozhrania
+ * 
+ * @param data_part Dátová časť obsahujúca zašifrované dáta
+ * @param base_host Base host zadaný používateľom
+ */
 void callParsedQuery(char *data_part, char* base_host){
     char buffer[DNS_PACKET_LEN * 2] = {0};
     strcat(buffer, data_part);

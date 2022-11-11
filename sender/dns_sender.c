@@ -76,6 +76,7 @@ void clearSenderData(SenderData *senderData){
  * 
  * @param senderArguments Argumenty dns_sender skriptu
  * @param dataPayload Dátová časť payloadu
+ * @param payload_size Veľkosť payloadu
  * @param type Typ DNS paketu
  */
 void sendSenderData(SenderArguments *senderArguments, char *dataPayload, int payload_size , PacketType type){
@@ -203,8 +204,9 @@ void sendInitPacket(char *ip_address, char *data, char *base_host){
  * @param ip_address IP adresa DNS serveru (prijímateľa)
  * @param data Dáta DNS paketu
  * @param base_host Base host zadaný ako parameter skriptu
+ * @param chunk_size Veľkosť dát zašifrovaných v pakete
  */
-void sendDataPacket(char *ip_address, char *data, char *base_host, char * file_path, int chunk_size){
+void sendDataPacket(char *ip_address, char *data, char *base_host, char *file_path, int chunk_size){
     struct sockaddr_in destination;
 
     destination.sin_family = AF_INET;
