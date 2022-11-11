@@ -25,7 +25,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <inttypes.h>
-#include <stdint.h>
 #include <errno.h>
 
 #include "program_arguments.h"
