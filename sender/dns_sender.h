@@ -39,6 +39,6 @@ void sendInitPacket(char *ip_address, char *data, char *base_host);
 void sendDataPacket(char *ip_address, char *data, char *base_host, char *file_path, int chunk_size);
 void sendEndPacket(char *ip_address, char *data, char *base_host);
 void loadData(SenderArguments *senderArguments);
-char *getImplicitDNSserverIP();
+void getImplicitDNSserverIP(char *ip_address);
 
 #endif // DNS_SENDER_H

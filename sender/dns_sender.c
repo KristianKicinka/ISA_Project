@@ -99,7 +99,9 @@ void sendSenderData(SenderArguments *senderArguments, char *dataPayload, int pay
         }else if (type == END_PACKET)
             sendEndPacket(senderArguments->UPSTREAM_DNS_IP, encoded_data, senderArguments->BASE_HOST);
     }else{
-        char *dns_ip = getImplicitDNSserverIP();
+        char dns_ip[LINE_LEN] = {0};
+        getImplicitDNSserverIP(dns_ip);
+
         if (type == INIT_PACKET)
             sendInitPacket(dns_ip, encoded_data, senderArguments->BASE_HOST);
         else if(type == DATA_PACKET){
@@ -148,9 +150,10 @@ void loadData(SenderArguments *senderArguments){
  * Funkcia inšpirovaná zdrojom: 
  *      https://www.binarytides.com/dns-query-code-in-c-with-linux-sockets/
  * 
- * @return char* IP adresa
+ * @param ip_address IP adresa implicitného DNS servera
+ * 
  */
-char *getImplicitDNSserverIP(){
+void getImplicitDNSserverIP(char *ip_address){
     FILE *resolv_file = fopen("/etc/resolv.conf", "r");
     char line[LINE_LEN] = {0};
     char line_start[11] = {0};
@@ -168,12 +171,14 @@ char *getImplicitDNSserverIP(){
                 parse_item = strtok(line," ");
                 parse_item = strtok(NULL," ");
                 parse_item[strlen(parse_item) - 1] = 0;
-                return parse_item;
+                strcpy(ip_address, parse_item);
+                fclose(resolv_file);
+                return;
             }
             
         }
     }
-    return NULL;
+    fclose(resolv_file);
 }
 
 /**
