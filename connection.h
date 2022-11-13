@@ -33,7 +33,7 @@
 
 #define PACKET_ID 1444
 
-#define DNS_PORT 8181
+#define DNS_PORT 53
 #define DNS_PACKET_LEN 512
 
 #define INIT_PACKET_CODE 12
