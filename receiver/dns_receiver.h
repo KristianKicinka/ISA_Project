@@ -26,6 +26,7 @@ void sendConfirmPacket(int socket, struct sockaddr_in destination, char *recv_pa
 void convertDNSQuery(char *data);
 int getDataFromPayload(char *data_payload, unsigned char *data, int data_size, char *base_host, PacketType type);
 void callParsedQuery(char *data_part, char* base_host);
+void closeSockets(int sig);
 
 
 #endif // DNS_RECEIVER_H

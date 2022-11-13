@@ -18,6 +18,7 @@ char file_path[FILE_PATH_LEN] = {0};
 
 int chunk_id = 0;
 
+int glob_socket = 0;
 
 int main(int argc, char const *argv[]){
 
@@ -34,6 +35,9 @@ int main(int argc, char const *argv[]){
     
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0)
         proccessError(INTERNAL_ERROR);
+    
+    glob_socket = sock;
+    signal(SIGINT, closeSockets);
 
     socklen_t length;
     char recv_buffer[DNS_PACKET_LEN] = {0};
@@ -200,4 +204,14 @@ void callParsedQuery(char *data_part, char* base_host){
 
     // Volanie dns_reciever_events funkcie
     dns_receiver__on_query_parsed(file_path, buffer);
+}
+
+/**
+ * @brief Funkcia zabezpečuje ukončenie otvorených soketov
+ * 
+ * @param sig číslo signálu
+ */
+void closeSockets(int sig){
+    close(glob_socket);
+    exit(0);
 }
