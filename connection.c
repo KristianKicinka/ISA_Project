@@ -90,7 +90,7 @@ int createDNSquery(unsigned char *query, char *payload, char *base_host){
     *current_query_position++ = (unsigned char) 0;
     *current_query_position++ = (unsigned char) 1;
     *current_query_position++ = (unsigned char) 0;
-    *current_query_position = (unsigned char) 1;
+    *current_query_position++ = (unsigned char) 1;
 
     return current_query_position - query;
 }
@@ -119,6 +119,7 @@ void translateToDNSquery(char* query, char *data){
         }
     }
     query[lock] = (unsigned char) position;
+    query[lock + position + 1] = (unsigned char) 0;
 }
 
 /**
