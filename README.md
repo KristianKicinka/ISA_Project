@@ -78,6 +78,7 @@ Po spustení modulu sa vatvorí a nastaví soket, následne sa vytvorí a inicia
 - program_arguments.h
 - program_arguments.c
 - README.md
+- manual.pdf
 - Makefile
 
 
